@@ -7,10 +7,23 @@ import '../constants/colors.dart';
 
 import '../widgets/todo_item.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
 
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   final todoslist = ToDO.todoList();
+  List<ToDO> _foundToDo = [];
+  final _todoController = TextEditingController();
+
+  @override
+  void initState() {
+    _foundToDo = todoslist;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +49,11 @@ class Home extends StatelessWidget {
                           ),
                         ),
                       ),
-                      for (ToDO todoo in todoslist)
+                      for (ToDO todoo in _foundToDo.reversed)
                         ToDoItem(
                           todo: todoo,
+                          onToDoChanged: _handleToDoChange,
+                          onDeleteItem: _deleteToDoItem,
                         ),
                     ],
                   ),
@@ -70,6 +85,7 @@ class Home extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: TextField(
+                  controller: _todoController,
                   decoration: InputDecoration(
                     hintText: "Add new task",
                     border: InputBorder.none,
@@ -82,7 +98,9 @@ class Home extends StatelessWidget {
                   right: 20,
                 ),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _addToDoItem(_todoController.text);
+                  },
                   child: Text(
                     '+',
                     style: TextStyle(
@@ -101,6 +119,44 @@ class Home extends StatelessWidget {
         )
       ]),
     );
+  }
+
+  void _handleToDoChange(ToDO todo) {
+    setState(() {
+      todo.isDone = !todo.isDone;
+    });
+  }
+
+  void _deleteToDoItem(String id) {
+    setState(() {
+      todoslist.removeWhere((item) => item.id == id);
+    });
+  }
+
+  void _addToDoItem(String toDo) {
+    setState(() {
+      todoslist.add(ToDO(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          todoText: toDo));
+    });
+    _todoController.clear();
+  }
+
+  void _runfilter(String enteredKeyword) {
+    List<ToDO> results = [];
+    if (enteredKeyword.isEmpty) {
+      results = todoslist;
+    } else {
+      results = todoslist
+          .where((item) => item.todoText!
+              .toLowerCase()
+              .contains(enteredKeyword.toLowerCase()))
+          .toList();
+    }
+
+    setState(() {
+      _foundToDo = results;
+    });
   }
 
   AppBar _buildAppbar() {
@@ -127,20 +183,15 @@ class Home extends StatelessWidget {
       ),
     );
   }
-}
-
-class searchBox extends StatelessWidget {
-  const searchBox({
-    super.key,
-  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget searchBox() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(20)),
       child: TextField(
+        onChanged: (value) => _runfilter(value),
         decoration: InputDecoration(
             contentPadding: EdgeInsets.all(0),
             prefixIcon: Icon(

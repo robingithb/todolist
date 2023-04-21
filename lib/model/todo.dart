@@ -17,6 +17,9 @@ class ToDO {
       ToDO(id: '04', todoText: "Team Meetings", isDone: false),
       ToDO(id: '05', todoText: "Work on mobile apps for 2 hrs", isDone: false),
       ToDO(id: '06', todoText: "Dinner with clients", isDone: false),
+      ToDO(id: '07', todoText: "copied", isDone: false),
+      ToDO(id: '08', todoText: "sleep", isDone: false),
+      ToDO(id: '09', todoText: "wakup", isDone: false),
     ];
   }
 }
